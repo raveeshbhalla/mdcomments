@@ -1,0 +1,20 @@
+{
+  "name": "mdcomment",
+  "version": "0.1.0",
+  "description": "CLI tool for MDComments - comment threads and suggested edits for Markdown files",
+  "bin": {
+    "mdcomment": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "nanoid": "^5.0.9"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0"
+  }
+}

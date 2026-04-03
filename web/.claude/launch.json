@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mdcomments-web",
+      "runtimeExecutable": "/Users/raveesh/.nvm/versions/node/v24.13.0/bin/npx",
+      "runtimeArgs": ["next", "dev", "--port", "3000"],
+      "port": 3000
+    }
+  ]
+}
