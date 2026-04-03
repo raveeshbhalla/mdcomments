@@ -1,6 +1,6 @@
 # MDComments Specification
 
-**Version:** 0.1.0-draft **Status:** Draft **Authors:** Raveesh Bhalla **Date:** April 2, 2026
+**Version:** 0.1.0-draft **Status:** Draft **Authors:** Claude Code, Raveesh Bhalla **Date:** April 2, 2026
 
 ---
 
