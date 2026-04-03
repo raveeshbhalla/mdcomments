@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -515,6 +515,56 @@ export default function Editor() {
     })();
   }, [editor, fsSupported, autoLoadAttempted, loadFileContent, loadFileFromAPI, loadDemoContent]);
 
+  // Poll for external file changes (e.g. agent adding comments via CLI)
+  const lastMtimeRef = useRef<{ fileMtime: number; sidecarMtime: number | null } | null>(null);
+  const pollPausedRef = useRef(false);
+
+  useEffect(() => {
+    // Only poll for server API-loaded files
+    if (!fileState.absolutePath) {
+      lastMtimeRef.current = null;
+      return;
+    }
+
+    const abspath = fileState.absolutePath;
+
+    const poll = async () => {
+      // Pause polling while we're saving to avoid false reloads
+      if (pollPausedRef.current) return;
+
+      try {
+        const res = await fetch(`/api/file/poll?path=${encodeURIComponent(abspath)}`);
+        if (!res.ok) return;
+
+        const { fileMtime, sidecarMtime } = await res.json();
+
+        if (lastMtimeRef.current === null) {
+          // First poll — just record the baseline
+          lastMtimeRef.current = { fileMtime, sidecarMtime };
+          return;
+        }
+
+        const prev = lastMtimeRef.current;
+        const fileChanged = fileMtime !== prev.fileMtime;
+        const sidecarChanged = sidecarMtime !== prev.sidecarMtime;
+
+        if (fileChanged || sidecarChanged) {
+          lastMtimeRef.current = { fileMtime, sidecarMtime };
+          // Reload the file
+          await loadFileFromAPI(abspath);
+        }
+      } catch {
+        // Network error — skip this tick
+      }
+    };
+
+    const intervalId = setInterval(poll, 2000);
+    // Run first poll immediately to set baseline
+    poll();
+
+    return () => clearInterval(intervalId);
+  }, [fileState.absolutePath, loadFileFromAPI]);
+
   // Handle save
   const handleSave = useCallback(async () => {
     if (!editor) return;
@@ -531,6 +581,7 @@ export default function Editor() {
     try {
       if (fileState.absolutePath) {
         // Save via server API
+        pollPausedRef.current = true;
         const sidecar = threads.size > 0 ? toSidecar() : undefined;
         await fetch('/api/file', {
           method: 'POST',
@@ -541,6 +592,14 @@ export default function Editor() {
             sidecar,
           }),
         });
+        // Update baseline mtime after our own write
+        try {
+          const pollRes = await fetch(`/api/file/poll?path=${encodeURIComponent(fileState.absolutePath)}`);
+          if (pollRes.ok) {
+            lastMtimeRef.current = await pollRes.json();
+          }
+        } catch { /* ignore */ }
+        pollPausedRef.current = false;
         setFileState((prev) => ({ ...prev, hasUnsavedChanges: false }));
       } else {
         // Save via File System Access API
@@ -578,6 +637,7 @@ export default function Editor() {
         const sidecar = toSidecar();
         if (fileState.absolutePath) {
           // Save via server API
+          pollPausedRef.current = true;
           await fetch('/api/file', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -586,6 +646,14 @@ export default function Editor() {
               sidecar,
             }),
           });
+          // Update baseline mtime after our own write
+          try {
+            const pollRes = await fetch(`/api/file/poll?path=${encodeURIComponent(fileState.absolutePath)}`);
+            if (pollRes.ok) {
+              lastMtimeRef.current = await pollRes.json();
+            }
+          } catch { /* ignore */ }
+          pollPausedRef.current = false;
         } else if (fileState.dirHandle) {
           await saveSidecar(fileState.dirHandle, fileState.name, sidecar);
         }
