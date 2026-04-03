@@ -1,0 +1,9 @@
+{
+	"id": "mdcomments",
+	"name": "MDComments",
+	"version": "0.1.0",
+	"minAppVersion": "1.0.0",
+	"description": "View and manage mdcomments-format comments in your markdown files. Shows comment threads in a sidebar and highlights commented text in the editor.",
+	"author": "mdcomments",
+	"isDesktopOnly": false
+}

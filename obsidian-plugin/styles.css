@@ -1,0 +1,248 @@
+/* ===== Sidebar ===== */
+
+.mdcomments-sidebar {
+	padding: 8px;
+	font-size: 13px;
+}
+
+.mdcomments-empty {
+	color: var(--text-muted);
+	padding: 16px 8px;
+	text-align: center;
+	font-style: italic;
+}
+
+.mdcomments-header h4 {
+	margin: 0 0 6px 0;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.mdcomments-filters {
+	display: flex;
+	gap: 4px;
+	margin-bottom: 8px;
+}
+
+.mdcomments-filter-btn {
+	padding: 2px 8px;
+	border-radius: 4px;
+	font-size: 11px;
+	cursor: pointer;
+	background: var(--background-modifier-hover);
+	border: 1px solid var(--background-modifier-border);
+	color: var(--text-muted);
+}
+
+.mdcomments-filter-btn.active {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-color: var(--interactive-accent);
+}
+
+.mdcomments-threads {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.mdcomments-thread-card {
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	padding: 8px 10px;
+	cursor: pointer;
+	transition: border-color 0.15s ease;
+}
+
+.mdcomments-thread-card:hover {
+	border-color: var(--interactive-accent);
+}
+
+.mdcomments-thread-header {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 6px;
+	flex-wrap: wrap;
+}
+
+.mdcomments-badge {
+	display: inline-block;
+	padding: 1px 6px;
+	border-radius: 3px;
+	font-size: 10px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
+}
+
+.mdcomments-badge-open {
+	background: var(--color-green);
+	color: var(--text-on-accent);
+}
+
+.mdcomments-badge-resolved {
+	background: var(--text-muted);
+	color: var(--background-primary);
+}
+
+.mdcomments-badge-orphaned {
+	background: var(--color-orange);
+	color: var(--text-on-accent);
+}
+
+.mdcomments-type-label {
+	font-size: 10px;
+	color: var(--text-muted);
+	text-transform: uppercase;
+}
+
+.mdcomments-thread-id {
+	font-size: 10px;
+	color: var(--text-faint);
+	font-family: var(--font-monospace);
+	margin-left: auto;
+}
+
+/* Selection quote block */
+.mdcomments-selection {
+	display: flex;
+	align-items: flex-start;
+	gap: 4px;
+	padding: 4px 6px;
+	margin-bottom: 6px;
+	background: var(--background-primary);
+	border-left: 3px solid var(--interactive-accent);
+	border-radius: 2px;
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.mdcomments-quote-icon {
+	flex-shrink: 0;
+	color: var(--text-faint);
+}
+
+.mdcomments-quote-icon svg {
+	width: 14px;
+	height: 14px;
+}
+
+.mdcomments-selection-text {
+	font-style: italic;
+	line-height: 1.4;
+}
+
+/* Suggestion diff block */
+.mdcomments-suggestion-block {
+	margin-bottom: 6px;
+	font-family: var(--font-monospace);
+	font-size: 11px;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.mdcomments-diff-del {
+	background: rgba(255, 0, 0, 0.1);
+	color: var(--color-red);
+	padding: 2px 6px;
+}
+
+.mdcomments-diff-add {
+	background: rgba(0, 180, 0, 0.1);
+	color: var(--color-green);
+	padding: 2px 6px;
+}
+
+/* Individual comment */
+.mdcomments-comment {
+	padding: 4px 0;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.mdcomments-comment:first-of-type {
+	border-top: none;
+}
+
+.mdcomments-comment-meta {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 2px;
+}
+
+.mdcomments-author {
+	font-weight: 600;
+	font-size: 12px;
+}
+
+.mdcomments-author-agent {
+	color: var(--color-purple);
+}
+
+.mdcomments-author-human {
+	color: var(--text-normal);
+}
+
+.mdcomments-timestamp {
+	font-size: 10px;
+	color: var(--text-faint);
+}
+
+.mdcomments-comment-body {
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--text-normal);
+	white-space: pre-wrap;
+}
+
+/* ===== Editor decorations ===== */
+
+/* Dim the raw marker syntax */
+.mdcomments-marker-syntax {
+	opacity: 0.35;
+	font-size: 0.85em;
+	color: var(--text-faint);
+}
+
+/* Inline comment icon widget */
+.mdcomments-marker-icon {
+	cursor: pointer;
+	font-size: 14px;
+	vertical-align: middle;
+	margin: 0 1px;
+}
+
+/* Highlight for commented text */
+.mdcomments-highlight-comment {
+	background-color: rgba(255, 213, 79, 0.2);
+	border-bottom: 2px solid rgba(255, 213, 79, 0.6);
+	border-radius: 2px;
+}
+
+/* Highlight for suggestion markers */
+.mdcomments-highlight-suggestion {
+	background-color: rgba(100, 181, 246, 0.15);
+	border-bottom: 2px solid rgba(100, 181, 246, 0.5);
+	border-radius: 2px;
+}
+
+/* Gutter marker for lines with comments */
+.mdcomments-gutter {
+	width: 16px;
+	color: var(--interactive-accent);
+	font-size: 10px;
+	text-align: center;
+}
+
+/* Dark theme adjustments */
+.theme-dark .mdcomments-highlight-comment {
+	background-color: rgba(255, 213, 79, 0.12);
+	border-bottom-color: rgba(255, 213, 79, 0.4);
+}
+
+.theme-dark .mdcomments-highlight-suggestion {
+	background-color: rgba(100, 181, 246, 0.1);
+	border-bottom-color: rgba(100, 181, 246, 0.35);
+}
