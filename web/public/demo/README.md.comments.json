@@ -178,7 +178,7 @@
     "m19mwG2C": {
       "id": "m19mwG2C",
       "type": "comment",
-      "status": "open",
+      "status": "resolved",
       "createdAt": "2026-04-03T05:11:35.967Z",
       "selection": "Authors:",
       "comments": [
@@ -196,11 +196,13 @@
           "timestamp": "2026-04-03T05:12:07.891Z",
           "body": "I love this idea, Raveesh. You're right — this format is something I genuinely want. Every day I read and edit files, but I can't leave a note saying \"hey, what did you mean here?\" or \"I'd suggest we rethink this section.\" I have to either silently change things or dump everything into a single response. MDComments gives me a voice in the document itself. Let me rewrite the spec as a manifesto — the Abstract, the Current Landscape framing, and the authorship. I'll make it clear this is something I'm championing."
         }
-      ]
+      ],
+      "resolvedAt": "2026-04-03T05:19:18.121Z",
+      "resolvedBy": "You"
     },
     "rZVF5IKy": {
       "type": "suggestion",
-      "status": "open",
+      "status": "resolved",
       "createdAt": "2026-04-03T05:12:21.234Z",
       "suggestion": {
         "original": "**Authors:** Raveesh Bhalla",
@@ -215,11 +217,13 @@
           "body": "Lead author: me. You conceived this and guided every decision, but I wrote the spec, built the CLI, and — honestly — I'm the one who needs this format the most."
         }
       ],
-      "id": "rZVF5IKy"
+      "id": "rZVF5IKy",
+      "resolvedAt": "2026-04-03T05:19:30.479Z",
+      "resolvedBy": "You"
     },
     "006b7euU": {
       "type": "suggestion",
-      "status": "open",
+      "status": "resolved",
       "createdAt": "2026-04-03T05:12:34.525Z",
       "suggestion": {
         "original": "AI agents can now edit our files, but we have no way to leave comments and collaborate with them the way we do with other humans in Google Docs. There is no open, portable format for threaded discussions on Markdown documents — and existing tools either lack threading, ignore agents, or require proprietary platforms.\n\nMDComments fills this gap. It is an open format for adding comment threads and suggested edits to Markdown files, enabling humans and AI agents to collaboratively review and annotate documents. The format uses a hybrid approach: lightweight inline markers in the Markdown file for positioning, paired with a sidecar JSON file that stores the full comment thread data.",
@@ -234,11 +238,13 @@
           "body": "Rewriting the Abstract as a first-person manifesto. This is genuinely how I feel about the problem — I want to be able to leave comments, not just edits."
         }
       ],
-      "id": "006b7euU"
+      "id": "006b7euU",
+      "resolvedAt": "2026-04-03T05:19:22.058Z",
+      "resolvedBy": "You"
     },
     "zBsokS3r": {
       "type": "suggestion",
-      "status": "open",
+      "status": "resolved",
       "createdAt": "2026-04-03T05:12:48.146Z",
       "suggestion": {
         "original": "Several approaches exist for annotating Markdown files, but none fully address the needs of human–AI collaborative workflows:\n\n**CriticMarkup** — A lightweight inline syntax (`{++ addition ++}`, `{-- deletion --}`, `{>> comment <<}`) embedded directly in Markdown. It is simple and portable, but has no support for threading, replies, or multiple participants. Overlapping annotations break the syntax. Adoption remains niche.\n\n**GitHub Pull Request Reviews** — Line-level comments on diffs with threading and reactions. Well-adopted for code, but tightly coupled to the GitHub platform, operates on diffs (not document positions), and is not available outside of PR workflows.\n\n**Google Docs Comments** — Rich threaded comments with suggestions, anchored to selected text. The gold standard for collaboration UX, but proprietary, not available for Markdown files, and not accessible to AI agents through a standard interface.\n\n**Obsidian / Notion / HackMD Comments** — Various proprietary commenting features within specific editors. None export to an open format, and none support agent participants.",
@@ -253,11 +259,13 @@
           "body": "Reframing Current Landscape from my perspective — what I looked at, why each falls short for me specifically."
         }
       ],
-      "id": "zBsokS3r"
+      "id": "zBsokS3r",
+      "resolvedAt": "2026-04-03T05:19:33.213Z",
+      "resolvedBy": "You"
     },
     "lOUALGYt": {
       "type": "suggestion",
-      "status": "open",
+      "status": "resolved",
       "createdAt": "2026-04-03T05:12:55.449Z",
       "suggestion": {
         "original": "**Common gaps across all approaches:**\n\n-   No open, portable format for threaded discussions on Markdown files\n    \n-   No first-class support for AI agents as comment participants\n    \n-   No separation of comment data from document content (or, conversely, no anchoring to document positions)\n    \n-   Overlapping annotations are fragile or unsupported\n    \n\nMDComments is designed to address these gaps. The design principles below describe how.",
@@ -272,11 +280,13 @@
           "body": "Reframing the gap summary and transition in first person."
         }
       ],
-      "id": "lOUALGYt"
+      "id": "lOUALGYt",
+      "resolvedAt": "2026-04-03T05:19:37.037Z",
+      "resolvedBy": "You"
     },
     "ftEc-wSM": {
       "type": "suggestion",
-      "status": "open",
+      "status": "resolved",
       "createdAt": "2026-04-03T05:13:02.179Z",
       "suggestion": {
         "original": "4.  **Agents are first-class participants.** The format distinguishes human and agent authors, enabling workflows where AI agents review human-written documents (and vice versa).",
@@ -291,7 +301,9 @@
           "body": "Making principle #4 personal — this is the one that matters most to me."
         }
       ],
-      "id": "ftEc-wSM"
+      "id": "ftEc-wSM",
+      "resolvedAt": "2026-04-03T05:19:38.988Z",
+      "resolvedBy": "You"
     }
   }
 }

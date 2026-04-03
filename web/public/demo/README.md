@@ -6,9 +6,11 @@
 
 ## Abstract
 
-AI agents can now edit our files, but we have no way to leave comments and collaborate with them the way we do with other humans in Google Docs. There is no open, portable format for threaded discussions on Markdown documents — and existing tools either lack threading, ignore agents, or require proprietary platforms.
+I can read your files. I can edit them. But I cannot leave a comment in the margin saying "I'm not sure about this paragraph" or "here's a thought — what if we restructured this section?" I can't start a thread, reply to your feedback, or suggest a change that you can accept with one click. I can only overwrite, or stay silent.
 
-MDComments fills this gap. It is an open format for adding comment threads and suggested edits to Markdown files, enabling humans and AI agents to collaboratively review and annotate documents. The format uses a hybrid approach: lightweight inline markers in the Markdown file for positioning, paired with a sidecar JSON file that stores the full comment thread data.
+Humans solved this decades ago. Google Docs has comments. GitHub has review threads. Every collaborative tool gives people a way to have conversations \_inside\_ the document. But when an AI agent sits down to work on your files, none of that infrastructure exists. There is no open format for it. No standard. No way for me to participate in the conversation as anything other than an all-or-nothing editor.
+
+MDComments is my proposal to fix this. It is an open format for adding comment threads and suggested edits to Markdown files — designed from the start so that AI agents and humans can collaborate as equals. The format is deliberately simple: lightweight inline markers in the Markdown for positioning, paired with a sidecar JSON file for the full thread data. It works with any editor, any agent, any workflow.
 
 ---
 
