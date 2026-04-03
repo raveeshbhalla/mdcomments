@@ -431,8 +431,8 @@ export default function Editor() {
       if (!editor) return;
       try {
         const [mdRes, sidecarRes] = await Promise.all([
-          fetch('/demo/mdcomments-spec.md'),
-          fetch('/demo/mdcomments-spec.md.comments.json'),
+          fetch('/demo/README.md'),
+          fetch('/demo/README.md.comments.json'),
         ]);
         if (!mdRes.ok) return;
 
@@ -446,7 +446,7 @@ export default function Editor() {
         setFileState({
           handle: null,
           dirHandle: null,
-          name: 'mdcomments-spec.md',
+          name: 'README.md',
           absolutePath: null,
           hasUnsavedChanges: false,
         });
