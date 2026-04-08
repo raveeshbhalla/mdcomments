@@ -22,10 +22,28 @@ __export(main_exports, {
   default: () => MDCommentsPlugin
 });
 module.exports = __toCommonJS(main_exports);
-var import_obsidian2 = require("obsidian");
+var import_obsidian3 = require("obsidian");
 
 // src/sidebar.ts
 var import_obsidian = require("obsidian");
+
+// src/ids.ts
+var ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+function randomId(length) {
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+  }
+  return result;
+}
+function generateThreadId() {
+  return randomId(8);
+}
+function generateCommentId() {
+  return `c_${randomId(8)}`;
+}
+
+// src/sidebar.ts
 var SIDEBAR_VIEW_TYPE = "mdcomments-sidebar";
 var CommentsSidebarView = class extends import_obsidian.ItemView {
   constructor(leaf, plugin) {
@@ -47,21 +65,48 @@ var CommentsSidebarView = class extends import_obsidian.ItemView {
   async onClose() {
     this.contentEl.empty();
   }
+  /** Get the active md file and its sidecar path */
+  getActivePaths() {
+    const mdFile = this.app.workspace.getActiveFile();
+    if (!mdFile || mdFile.extension !== "md")
+      return null;
+    return { mdFile, sidecarPath: mdFile.path + ".comments.json" };
+  }
+  /** Read + parse the sidecar, returning null on failure */
+  async readSidecar() {
+    const paths = this.getActivePaths();
+    if (!paths)
+      return null;
+    const file = this.app.vault.getAbstractFileByPath(paths.sidecarPath);
+    if (!file || !(file instanceof import_obsidian.TFile))
+      return null;
+    try {
+      const raw = await this.app.vault.read(file);
+      const sidecar = JSON.parse(raw);
+      return { sidecar, sidecarPath: paths.sidecarPath, mdFile: paths.mdFile };
+    } catch (e) {
+      return null;
+    }
+  }
+  /** Write the sidecar back to disk */
+  async writeSidecar(sidecarPath, sidecar) {
+    const file = this.app.vault.getAbstractFileByPath(sidecarPath);
+    if (file && file instanceof import_obsidian.TFile) {
+      await this.app.vault.modify(file, JSON.stringify(sidecar, null, 2) + "\n");
+    }
+  }
   render() {
     const container = this.contentEl;
     container.empty();
     container.addClass("mdcomments-sidebar");
-    const activeFile = this.app.workspace.getActiveFile();
-    if (!activeFile || activeFile.extension !== "md") {
-      const empty = container.createDiv({ cls: "mdcomments-empty" });
-      empty.setText("Open a markdown file to see comments.");
+    const paths = this.getActivePaths();
+    if (!paths) {
+      container.createDiv({ cls: "mdcomments-empty", text: "Open a markdown file to see comments." });
       return;
     }
-    const sidecarPath = activeFile.path + ".comments.json";
-    const sidecarFile = this.app.vault.getAbstractFileByPath(sidecarPath);
+    const sidecarFile = this.app.vault.getAbstractFileByPath(paths.sidecarPath);
     if (!sidecarFile) {
-      const empty = container.createDiv({ cls: "mdcomments-empty" });
-      empty.setText("No comments found for this file.");
+      container.createDiv({ cls: "mdcomments-empty", text: "No comments found for this file." });
       return;
     }
     this.app.vault.cachedRead(sidecarFile).then((raw) => {
@@ -69,36 +114,24 @@ var CommentsSidebarView = class extends import_obsidian.ItemView {
       try {
         sidecar = JSON.parse(raw);
       } catch (e) {
-        const err = container.createDiv({ cls: "mdcomments-empty" });
-        err.setText("Failed to parse comments file.");
+        container.createDiv({ cls: "mdcomments-empty", text: "Failed to parse comments file." });
         return;
       }
-      const threads = sidecar.threads;
-      const entries = Object.entries(threads);
+      const entries = Object.entries(sidecar.threads);
       if (entries.length === 0) {
-        const empty = container.createDiv({ cls: "mdcomments-empty" });
-        empty.setText("No comment threads.");
+        container.createDiv({ cls: "mdcomments-empty", text: "No comment threads." });
         return;
       }
       const header = container.createDiv({ cls: "mdcomments-header" });
       header.createEl("h4", { text: `Comments (${entries.length})` });
       const filters = header.createDiv({ cls: "mdcomments-filters" });
-      const showAll = filters.createEl("button", {
-        text: "All",
-        cls: "mdcomments-filter-btn active"
-      });
-      const showOpen = filters.createEl("button", {
-        text: "Open",
-        cls: "mdcomments-filter-btn"
-      });
-      const showResolved = filters.createEl("button", {
-        text: "Resolved",
-        cls: "mdcomments-filter-btn"
-      });
-      const threadContainer = container.createDiv({
-        cls: "mdcomments-threads"
-      });
+      const showAll = filters.createEl("button", { text: "All", cls: "mdcomments-filter-btn active" });
+      const showOpen = filters.createEl("button", { text: "Open", cls: "mdcomments-filter-btn" });
+      const showResolved = filters.createEl("button", { text: "Resolved", cls: "mdcomments-filter-btn" });
+      const threadContainer = container.createDiv({ cls: "mdcomments-threads" });
+      let currentFilter = "all";
       const renderThreads = (filter) => {
+        currentFilter = filter;
         threadContainer.empty();
         const filtered = entries.filter(([, t]) => {
           if (filter === "all")
@@ -108,10 +141,7 @@ var CommentsSidebarView = class extends import_obsidian.ItemView {
           return t.status === "resolved";
         });
         if (filtered.length === 0) {
-          threadContainer.createDiv({
-            cls: "mdcomments-empty",
-            text: `No ${filter} threads.`
-          });
+          threadContainer.createDiv({ cls: "mdcomments-empty", text: `No ${filter} threads.` });
           return;
         }
         for (const [id, thread] of filtered) {
@@ -119,9 +149,7 @@ var CommentsSidebarView = class extends import_obsidian.ItemView {
         }
       };
       const setActive = (btn) => {
-        [showAll, showOpen, showResolved].forEach(
-          (b) => b.removeClass("active")
-        );
+        [showAll, showOpen, showResolved].forEach((b) => b.removeClass("active"));
         btn.addClass("active");
       };
       showAll.addEventListener("click", () => {
@@ -142,18 +170,9 @@ var CommentsSidebarView = class extends import_obsidian.ItemView {
   renderThread(parent, threadId, thread) {
     const card = parent.createDiv({ cls: "mdcomments-thread-card" });
     const headerRow = card.createDiv({ cls: "mdcomments-thread-header" });
-    const badge = headerRow.createSpan({
-      cls: `mdcomments-badge mdcomments-badge-${thread.status}`,
-      text: thread.status
-    });
-    const typeLabel = headerRow.createSpan({
-      cls: "mdcomments-type-label",
-      text: thread.type
-    });
-    const idLabel = headerRow.createSpan({
-      cls: "mdcomments-thread-id",
-      text: threadId
-    });
+    headerRow.createSpan({ cls: `mdcomments-badge mdcomments-badge-${thread.status}`, text: thread.status });
+    headerRow.createSpan({ cls: "mdcomments-type-label", text: thread.type });
+    headerRow.createSpan({ cls: "mdcomments-thread-id", text: threadId });
     if (thread.type === "comment" && thread.selection) {
       const selBlock = card.createDiv({ cls: "mdcomments-selection" });
       const quoteIcon = selBlock.createSpan({ cls: "mdcomments-quote-icon" });
@@ -179,6 +198,49 @@ var CommentsSidebarView = class extends import_obsidian.ItemView {
     for (const comment of thread.comments) {
       this.renderComment(card, comment);
     }
+    const actions = card.createDiv({ cls: "mdcomments-actions" });
+    if (thread.status === "open") {
+      const resolveBtn = actions.createEl("button", {
+        cls: "mdcomments-action-btn mdcomments-resolve-btn",
+        text: "Resolve"
+      });
+      const checkIcon = resolveBtn.createSpan({ cls: "mdcomments-btn-icon" });
+      (0, import_obsidian.setIcon)(checkIcon, "check");
+      resolveBtn.prepend(checkIcon);
+      resolveBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.resolveThread(threadId);
+      });
+    }
+    if (thread.status === "open") {
+      const replyArea = card.createDiv({ cls: "mdcomments-reply-area" });
+      const replyInput = replyArea.createEl("textarea", {
+        cls: "mdcomments-reply-input",
+        attr: { placeholder: "Write a reply...", rows: "2" }
+      });
+      const replyBtn = replyArea.createEl("button", {
+        cls: "mdcomments-action-btn mdcomments-reply-btn",
+        text: "Reply"
+      });
+      replyInput.addEventListener("click", (e) => e.stopPropagation());
+      replyBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const body = replyInput.value.trim();
+        if (body) {
+          this.addReply(threadId, body);
+        }
+      });
+      replyInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          e.stopPropagation();
+          const body = replyInput.value.trim();
+          if (body) {
+            this.addReply(threadId, body);
+          }
+        }
+      });
+    }
     card.addEventListener("click", () => {
       this.scrollToMarker(threadId);
     });
@@ -186,7 +248,7 @@ var CommentsSidebarView = class extends import_obsidian.ItemView {
   renderComment(parent, comment) {
     const el = parent.createDiv({ cls: "mdcomments-comment" });
     const meta = el.createDiv({ cls: "mdcomments-comment-meta" });
-    const authorEl = meta.createSpan({
+    meta.createSpan({
       cls: `mdcomments-author mdcomments-author-${comment.authorType}`,
       text: comment.author
     });
@@ -201,10 +263,57 @@ var CommentsSidebarView = class extends import_obsidian.ItemView {
         minute: "2-digit"
       })
     });
-    el.createDiv({
-      cls: "mdcomments-comment-body",
-      text: comment.body
-    });
+    el.createDiv({ cls: "mdcomments-comment-body", text: comment.body });
+  }
+  /** Add a reply to a thread and persist to sidecar */
+  async addReply(threadId, body) {
+    const data = await this.readSidecar();
+    if (!data)
+      return;
+    const thread = data.sidecar.threads[threadId];
+    if (!thread)
+      return;
+    const newComment = {
+      id: generateCommentId(),
+      author: "Vault User",
+      authorType: "human",
+      timestamp: new Date().toISOString(),
+      body
+    };
+    thread.comments.push(newComment);
+    await this.writeSidecar(data.sidecarPath, data.sidecar);
+    this.render();
+  }
+  /** Resolve a thread: update sidecar status + remove marker from md file */
+  async resolveThread(threadId) {
+    const data = await this.readSidecar();
+    if (!data)
+      return;
+    const thread = data.sidecar.threads[threadId];
+    if (!thread)
+      return;
+    thread.status = "resolved";
+    thread.resolvedAt = new Date().toISOString();
+    thread.resolvedBy = "Vault User";
+    await this.writeSidecar(data.sidecarPath, data.sidecar);
+    const mdContent = await this.app.vault.read(data.mdFile);
+    let newContent = mdContent;
+    if (thread.type === "comment") {
+      newContent = newContent.replace(`{>>${threadId}}`, "");
+    } else if (thread.type === "suggestion") {
+      const escapedId = threadId.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+      const re = new RegExp(
+        `(?<!\\\\)\\{~~((?:[^~]|~(?!>)|\\\\~>)*?)~>((?:[^~]|~(?!~\\})|~(?!~${escapedId}\\}))*?)~~${escapedId}\\}`,
+        "g"
+      );
+      newContent = newContent.replace(re, (_match, orig) => {
+        return orig.replace(/\\{>>/g, "{>>").replace(/\\{~~/g, "{~~").replace(/\\~>/g, "~>").replace(/\\~~\}/g, "~~}");
+      });
+    }
+    if (newContent !== mdContent) {
+      await this.app.vault.modify(data.mdFile, newContent);
+    }
+    this.render();
   }
   scrollToMarker(threadId) {
     const view = this.app.workspace.getActiveViewOfType(import_obsidian.MarkdownView);
@@ -212,19 +321,14 @@ var CommentsSidebarView = class extends import_obsidian.ItemView {
       return;
     const editor = view.editor;
     const content = editor.getValue();
-    const commentPattern = `{>>${threadId}}`;
-    let idx = content.indexOf(commentPattern);
+    let idx = content.indexOf(`{>>${threadId}}`);
     if (idx === -1) {
-      const suggestionEndPattern = `~~${threadId}}`;
-      idx = content.indexOf(suggestionEndPattern);
+      idx = content.indexOf(`~~${threadId}}`);
     }
     if (idx >= 0) {
       const pos = editor.offsetToPos(idx);
       editor.setCursor(pos);
-      editor.scrollIntoView(
-        { from: pos, to: pos },
-        true
-      );
+      editor.scrollIntoView({ from: pos, to: pos }, true);
     }
   }
 };
@@ -376,13 +480,60 @@ var commentsGutter = (0, import_view2.gutter)({
   }
 });
 
+// src/addCommentModal.ts
+var import_obsidian2 = require("obsidian");
+var AddCommentModal = class extends import_obsidian2.Modal {
+  constructor(app, onSubmit) {
+    super(app);
+    this.onSubmit = onSubmit;
+  }
+  onOpen() {
+    const { contentEl } = this;
+    contentEl.addClass("mdcomments-modal");
+    contentEl.createEl("h3", { text: "Add comment" });
+    const textarea = contentEl.createEl("textarea", {
+      cls: "mdcomments-modal-input",
+      attr: { placeholder: "Write your comment...", rows: "4" }
+    });
+    const btnRow = contentEl.createDiv({ cls: "mdcomments-modal-buttons" });
+    const cancelBtn = btnRow.createEl("button", { text: "Cancel" });
+    const submitBtn = btnRow.createEl("button", {
+      text: "Add comment",
+      cls: "mod-cta"
+    });
+    cancelBtn.addEventListener("click", () => this.close());
+    submitBtn.addEventListener("click", () => {
+      const body = textarea.value.trim();
+      if (body) {
+        this.onSubmit(body);
+        this.close();
+      }
+    });
+    textarea.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        const body = textarea.value.trim();
+        if (body) {
+          this.onSubmit(body);
+          this.close();
+        }
+      }
+    });
+    setTimeout(() => textarea.focus(), 10);
+  }
+  onClose() {
+    this.contentEl.empty();
+  }
+};
+
 // src/main.ts
-var MDCommentsPlugin = class extends import_obsidian2.Plugin {
+var MDCommentsPlugin = class extends import_obsidian3.Plugin {
   async onload() {
     this.registerView(SIDEBAR_VIEW_TYPE, (leaf) => {
       return new CommentsSidebarView(leaf, this);
     });
     this.registerEditorExtension([commentsEditorPlugin, commentsGutter]);
+    this.registerMarkdownPostProcessor(this.stripMarkersPostProcessor.bind(this));
     this.addCommand({
       id: "open-comments-sidebar",
       name: "Open comments sidebar",
@@ -390,6 +541,25 @@ var MDCommentsPlugin = class extends import_obsidian2.Plugin {
         this.activateSidebar();
       }
     });
+    this.addCommand({
+      id: "add-comment",
+      name: "Add comment on selection",
+      editorCallback: (editor, view) => {
+        this.promptAddComment(editor, view);
+      }
+    });
+    this.registerEvent(
+      this.app.workspace.on("editor-menu", (menu, editor, view) => {
+        const selection = editor.getSelection();
+        if (selection && selection.length > 0) {
+          menu.addItem((item) => {
+            item.setTitle("Add comment").setIcon("message-square").onClick(() => {
+              this.promptAddComment(editor, view);
+            });
+          });
+        }
+      })
+    );
     this.addRibbonIcon("message-square", "MDComments", () => {
       this.activateSidebar();
     });
@@ -400,21 +570,21 @@ var MDCommentsPlugin = class extends import_obsidian2.Plugin {
     );
     this.registerEvent(
       this.app.vault.on("modify", (file) => {
-        if (file instanceof import_obsidian2.TFile && file.path.endsWith(".comments.json")) {
+        if (file instanceof import_obsidian3.TFile && file.path.endsWith(".comments.json")) {
           this.refreshSidebar();
         }
       })
     );
     this.registerEvent(
       this.app.vault.on("create", (file) => {
-        if (file instanceof import_obsidian2.TFile && file.path.endsWith(".comments.json")) {
+        if (file instanceof import_obsidian3.TFile && file.path.endsWith(".comments.json")) {
           this.refreshSidebar();
         }
       })
     );
     this.registerEvent(
       this.app.vault.on("delete", (file) => {
-        if (file instanceof import_obsidian2.TFile && file.path.endsWith(".comments.json")) {
+        if (file instanceof import_obsidian3.TFile && file.path.endsWith(".comments.json")) {
           this.refreshSidebar();
         }
       })
@@ -426,6 +596,90 @@ var MDCommentsPlugin = class extends import_obsidian2.Plugin {
   onunload() {
     this.app.workspace.detachLeavesOfType(SIDEBAR_VIEW_TYPE);
   }
+  /**
+   * Markdown post-processor: strips mdcomments markers from rendered
+   * (reading / live-preview) output so readers see clean text.
+   */
+  stripMarkersPostProcessor(el, _ctx) {
+    var _a;
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const nodesToReplace = [];
+    let node;
+    while (node = walker.nextNode()) {
+      const text = (_a = node.textContent) != null ? _a : "";
+      let cleaned = text.replace(/\{>>([a-zA-Z0-9_-]+)\}/g, "");
+      cleaned = cleaned.replace(
+        /\{~~((?:[^~]|~(?!>))*?)~>((?:[^~]|~(?!~[a-zA-Z0-9_-]+\}))*?)~~([a-zA-Z0-9_-]+)\}/g,
+        (_m, orig) => orig
+      );
+      if (cleaned !== text) {
+        nodesToReplace.push({ node, newText: cleaned });
+      }
+    }
+    for (const { node: node2, newText } of nodesToReplace) {
+      node2.textContent = newText;
+    }
+  }
+  /**
+   * Show a modal to type a comment, then insert the marker and sidecar entry.
+   */
+  promptAddComment(editor, view) {
+    const selection = editor.getSelection();
+    if (!selection || selection.length === 0)
+      return;
+    new AddCommentModal(this.app, async (commentBody) => {
+      await this.insertComment(editor, view, selection, commentBody);
+    }).open();
+  }
+  /**
+   * Insert a comment marker into the document and create the sidecar entry.
+   */
+  async insertComment(editor, view, selection, commentBody) {
+    const file = view.file;
+    if (!file)
+      return;
+    const threadId = generateThreadId();
+    const commentId = generateCommentId();
+    const from = editor.getCursor("from");
+    const marker = `{>>${threadId}}`;
+    editor.replaceRange(marker, from);
+    const sidecarPath = file.path + ".comments.json";
+    let sidecar;
+    const sidecarFile = this.app.vault.getAbstractFileByPath(sidecarPath);
+    if (sidecarFile && sidecarFile instanceof import_obsidian3.TFile) {
+      try {
+        const raw = await this.app.vault.read(sidecarFile);
+        sidecar = JSON.parse(raw);
+      } catch (e) {
+        sidecar = { schema: "mdcomments/0.1", threads: {} };
+      }
+    } else {
+      sidecar = { schema: "mdcomments/0.1", threads: {} };
+    }
+    const newComment = {
+      id: commentId,
+      author: "Vault User",
+      authorType: "human",
+      timestamp: new Date().toISOString(),
+      body: commentBody
+    };
+    sidecar.threads[threadId] = {
+      type: "comment",
+      status: "open",
+      createdAt: new Date().toISOString(),
+      selection,
+      resolvedAt: null,
+      resolvedBy: null,
+      comments: [newComment]
+    };
+    const sidecarContent = JSON.stringify(sidecar, null, 2) + "\n";
+    if (sidecarFile && sidecarFile instanceof import_obsidian3.TFile) {
+      await this.app.vault.modify(sidecarFile, sidecarContent);
+    } else {
+      await this.app.vault.create(sidecarPath, sidecarContent);
+    }
+    this.refreshSidebar();
+  }
   async activateSidebar() {
     const { workspace } = this.app;
     let leaf = null;
@@ -435,10 +689,7 @@ var MDCommentsPlugin = class extends import_obsidian2.Plugin {
     } else {
       leaf = workspace.getRightLeaf(false);
       if (leaf) {
-        await leaf.setViewState({
-          type: SIDEBAR_VIEW_TYPE,
-          active: true
-        });
+        await leaf.setViewState({ type: SIDEBAR_VIEW_TYPE, active: true });
       }
     }
     if (leaf) {

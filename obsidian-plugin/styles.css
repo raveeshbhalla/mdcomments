@@ -197,6 +197,109 @@
 	white-space: pre-wrap;
 }
 
+/* ===== Actions row ===== */
+
+.mdcomments-actions {
+	display: flex;
+	gap: 6px;
+	margin-top: 6px;
+}
+
+.mdcomments-action-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: 4px;
+	font-size: 11px;
+	cursor: pointer;
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+	color: var(--text-muted);
+}
+
+.mdcomments-action-btn:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.mdcomments-resolve-btn:hover {
+	border-color: var(--color-green);
+	color: var(--color-green);
+}
+
+.mdcomments-btn-icon {
+	display: inline-flex;
+	align-items: center;
+}
+
+.mdcomments-btn-icon svg {
+	width: 12px;
+	height: 12px;
+}
+
+/* ===== Reply area ===== */
+
+.mdcomments-reply-area {
+	margin-top: 6px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.mdcomments-reply-input {
+	width: 100%;
+	padding: 4px 6px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-size: 12px;
+	font-family: inherit;
+	resize: vertical;
+	min-height: 36px;
+}
+
+.mdcomments-reply-input:focus {
+	border-color: var(--interactive-accent);
+	outline: none;
+}
+
+.mdcomments-reply-btn {
+	align-self: flex-end;
+}
+
+/* ===== Add comment modal ===== */
+
+.mdcomments-modal h3 {
+	margin: 0 0 10px 0;
+}
+
+.mdcomments-modal-input {
+	width: 100%;
+	padding: 6px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-size: 13px;
+	font-family: inherit;
+	resize: vertical;
+	min-height: 60px;
+}
+
+.mdcomments-modal-input:focus {
+	border-color: var(--interactive-accent);
+	outline: none;
+}
+
+.mdcomments-modal-buttons {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	margin-top: 10px;
+}
+
 /* ===== Editor decorations ===== */
 
 /* Dim the raw marker syntax */
