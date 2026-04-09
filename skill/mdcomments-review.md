@@ -8,9 +8,35 @@ MDComments is an open format for adding comment threads and suggested edits to M
 - **Inline markers** in the `.md` file for positioning (`{>>THREAD_ID}` for comments, `{~~original~>replacement~~THREAD_ID}` for suggestions)
 - **A sidecar JSON file** (`<filename>.md.comments.json`) for thread data (authors, replies, timestamps)
 
-## How to Use
+## Setup
 
-You have access to the `mdcomment` CLI tool. Use it to add comments and suggestions to Markdown files.
+Before using any commands, verify the `mdcomment` CLI is available:
+
+```bash
+which mdcomment || npm install -g mdcomment
+```
+
+Run this check once at the start of any review task. If the install fails, try with `npx mdcomment` as a prefix instead.
+
+## Reading Comments
+
+To see what comments already exist on a document:
+
+```bash
+mdcomment list <file>
+```
+
+This shows all open threads with their positions, selections, and comment counts. Always check for existing comments before adding your own to avoid duplicating feedback.
+
+To check for issues like orphaned threads or malformed markers:
+
+```bash
+mdcomment lint <file>
+```
+
+## Writing Comments
+
+Use the `mdcomment` CLI to add comments and suggestions to Markdown files.
 
 ### Adding a Comment
 
@@ -44,14 +70,6 @@ To reply to an existing comment thread:
 mdcomment reply <file> --thread <thread-id> --body "Your reply" --author "agent:claude" --author-type agent
 ```
 
-### Listing Threads
-
-To see all open threads on a document:
-
-```bash
-mdcomment list <file>
-```
-
 ### Resolving a Thread
 
 To resolve a thread (only do this if the user asks you to):
@@ -65,14 +83,6 @@ mdcomment resolve <file> --thread <thread-id> --author "agent:claude"
 ```bash
 mdcomment accept <file> --thread <thread-id> --author "agent:claude"
 mdcomment reject <file> --thread <thread-id> --author "agent:claude"
-```
-
-### Linting
-
-To check for issues (orphaned threads, malformed markers):
-
-```bash
-mdcomment lint <file>
 ```
 
 ## Review Workflow

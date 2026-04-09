@@ -4,13 +4,7 @@ A [Claude Code agent skill](https://docs.anthropic.com/en/docs/claude-code/skill
 
 ## Install
 
-### Prerequisites
-
-Install the `mdcomment` CLI globally:
-
-```bash
-npm install -g mdcomment
-```
+The skill automatically installs the `mdcomment` CLI on first use if it isn't already available — no manual setup required.
 
 ### Add the Skill to Claude Code
 
