@@ -80,6 +80,14 @@ Removes all inline markers and outputs clean Markdown to stdout.
 mdcomment strip document.md
 ```
 
+### `watch` — Watch for changes
+
+Watches the sidecar file and prints new threads, replies, and status changes as they happen.
+
+```bash
+mdcomment watch document.md
+```
+
 ## AI Agent Usage
 
 MDComments has first-class support for AI agents. Use `--author-type agent` to distinguish agent comments from human ones:

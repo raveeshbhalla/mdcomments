@@ -10,6 +10,7 @@ import { rejectCommand } from './commands/reject.js';
 import { lintCommand } from './commands/lint.js';
 import { stripCommand } from './commands/strip.js';
 import { listCommand } from './commands/list.js';
+import { watchCommand } from './commands/watch.js';
 
 const program = new Command();
 
@@ -27,5 +28,6 @@ program.addCommand(rejectCommand);
 program.addCommand(lintCommand);
 program.addCommand(stripCommand);
 program.addCommand(listCommand);
+program.addCommand(watchCommand);
 
 program.parse();
